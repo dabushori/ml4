@@ -4,7 +4,7 @@ test_x
 report/test_x
 train_y
 report/train_y
-test_y
+test_y*
 report/test_y
 __pycache__
 __pycache__/*
