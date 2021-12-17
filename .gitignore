@@ -6,3 +6,11 @@ train_y
 report/train_y
 test_y
 report/test_y
+__pycache__
+__pycache__/*
+repore/__pycache__
+repore/__pycache__/*
+train_1000_x
+report/train_1000_x
+train_1000_y
+report/train_1000_y
