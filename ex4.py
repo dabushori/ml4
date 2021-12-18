@@ -113,6 +113,8 @@ Results so far:
 256,128 + dropout - 9834/11000
 128,64 + batch normalization - 9813/11000
 256,128 + batch normalization - 9867/11000
+128,64 + dropout + batch normalization - 9818/11000
+256,128 + dropout + batch normalization - 9848/11000
 '''
 
 
