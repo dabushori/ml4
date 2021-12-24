@@ -2,22 +2,22 @@ import sys
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset, DataLoader
-from torchvision import datasets
+from torchvision import datasets, transforms
 import torch.nn.functional as F
 
 
 class MyFashionMNISTModel(torch.nn.Module):
-    def __init__(self, layers=[128, 64], lr=0.01, bn=None, do=None, image_size=784):
+    def __init__(self, layers, lr, bn=None, dos=None, image_size=784):
         super(MyFashionMNISTModel, self).__init__()
         self.image_size = image_size
         self.fc0 = torch.nn.Linear(image_size, layers[0])  # hidden layer
         self.bn0 = torch.nn.BatchNorm1d(
             layers[0]) if bn else None  # batch normalization
-        self.do0 = torch.nn.Dropout(do) if do else None  # dropout layer
+        self.do0 = torch.nn.Dropout(dos[0]) if dos else None  # dropout layer
         self.fc1 = torch.nn.Linear(layers[0], layers[1])  # hidden layer
         self.bn1 = torch.nn.BatchNorm1d(
             layers[1]) if bn else None  # batch normalization
-        self.do1 = torch.nn.Dropout(do) if do else None  # dropout layer
+        self.do1 = torch.nn.Dropout(dos[1]) if dos else None  # dropout layer
         self.fc2 = torch.nn.Linear(layers[1], 10)  # output layer
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
 
@@ -32,8 +32,6 @@ class MyFashionMNISTModel(torch.nn.Module):
         x = F.relu(x)
         x = self.do1(x) if self.do1 else x
         return F.log_softmax(self.fc2(x), dim=1)
-
-# main function
 
 
 def train(model, train_loader):
@@ -74,20 +72,40 @@ def main():
     if len(sys.argv) < 4:
         print('Usgae: python ex4.py <path_to_train_x_file> <path_to_train_y_file> <path_to_test_x_file> <path_to_test_y_file>')
     trainx_path, trainy_path, testx_path, testy_path = sys.argv[1:5]
-    train_x_data = np.loadtxt(trainx_path) / 255 - 0.5
+    train_x_data = np.loadtxt(trainx_path)
     train_y_data = np.loadtxt(trainy_path, dtype=int)
-    test_x_data = np.loadtxt(testx_path) / 255 - 0.5
+    test_x_data = np.loadtxt(testx_path)
+
+    # # [0, 1] normalization
+    # train_x_data = train_x_data / 255
+    # test_x_data = test_x_data / 255
+
+    # # [-0.5, 0.5] normalization
+    # train_x_data = train_x_data / 255 - 0.5
+    # test_x_data = test_x_data / 255 - 0.5
+
+    # mean-std normalization
+    data = torch.from_numpy(train_x_data)
+    mean, std = data.mean().item(), data.std().item()
+    train_x_data = (train_x_data - mean) / std
+    test_x_data = (test_x_data - mean) / std
 
     train_dataset = TensorDataset(torch.from_numpy(
         train_x_data).float(), torch.from_numpy(train_y_data).long())
-    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=16)
+    train_loader = DataLoader(train_dataset, shuffle=True, batch_size=128)
 
-    epochs = 100
-    layers = [256, 128]
+    '''
+    Interesting results:
+    mean-std norm + 256,256 layers + 0.2, 0.5 dropouts + batch-norm + 50 epochs: 90.1% acc
+    
+    '''
+
+    epochs = 50
+    layers = [256, 256]
     lr = 0.01
     bn = True
-    do = 0.2
-    model = MyFashionMNISTModel(layers, lr, bn, do)
+    dos = [0.2, 0.5]
+    model = MyFashionMNISTModel(layers, lr, bn, dos)
 
     # train
     for i in range(1, epochs+1):
@@ -127,6 +145,8 @@ Results (train + test):
 256,128 + batch normalization - XXX
 128,64 + dropout + batch normalization - XXX
 256,128 + dropout + batch normalization - XXX
+
+256,128 + dropout 0.2 + batch norm + [-0.5,0.5] norm - 4502/5000 (90.03999999999999%)
 '''
 
 
