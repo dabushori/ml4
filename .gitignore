@@ -16,3 +16,5 @@ report/train_1000_x
 train_1000_y
 report/train_1000_y
 test_labels
+output/*
+states/*
