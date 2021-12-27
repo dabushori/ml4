@@ -116,7 +116,7 @@ def main():
     # min_loss = np.inf
     max_correct = -np.inf
     for i in range(1, epochs+1):
-        print(f'epoch {i}')
+        # print(f'epoch {i}')
         train(model, train_loader)
         loss, correct = test(model, val_loader)
         # if loss < min_loss:
@@ -124,7 +124,7 @@ def main():
         #     min_loss = loss
         #     torch.save(model.state_dict(), state_path)
         if correct > max_correct:
-            print(f'updating: {max_correct = }, {correct = }')
+            # print(f'updating: {max_correct = }, {correct = }')
             max_correct = correct
             # save the model if upgraded
             torch.save(model.state_dict(), state_path)
